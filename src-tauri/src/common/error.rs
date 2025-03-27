@@ -3,47 +3,60 @@
 //! This module defines a custom error type to capture errors the file
 //! management logic, including I/O errors, configuration issues, cloud provider
 //! integration problems, and CLI parsing errors
+//! and general errors. this implementation utilises the `thiserror` crate for a cleaner
+//! and more maintainable error-handling approach
 
-use std::fmt;
 use std::io;
+use thiserror::Error;
 
+#[non_exhaustive]
+#[derive(Error, Debug)]
 pub enum FileManagerError {
     /// An I/O error occurred.
-    IoError(io::Error),
+    #[error("I/O error: {0}")]
+    IoError(#[from] io::Error),
 
     /// An error occurred while parsing or handling configuration.
+    #[error("Configuration error: {0}")]
     ConfigError(String),
 
     /// An error occurred during CLI processing
+    #[error("CLI error: {0}")]
     CliError(String),
 
     /// A general error, with a custom message.
+    #[error("General error: {0}")]
     GeneralError(String),
 }
 
-impl fmt::Display for FileManagerError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            FileManagerError::IoError(ref err) => write!(f, "I/O error: {}", err),
-            FileManagerError::ConfigError(ref err) => write!(f, "Configuration error: {}", err),
-            FileManagerError::CliError(ref err) => write!(f, "Client error: {}", err),
-            FileManagerError::GeneralError(ref err) => write!(f, "General error: {}", err),
-        }
-    }
-}
 
-impl std::error::Error for FileManagerError{
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        // Only I/O errors have an underlying source
-        match self {
-            FileManagerError::IoError(ref err) => Some(err),
-        }
-    }
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io;
 
-/// Enable conversion from `std::io::Error` to `FileManagerError`
-impl From<io::Error> for FileManagerError {
-    fn from(err: io::Error) -> FileManagerError {
-        FileManagerError::IoError(err)
+    #[test]
+    fn test_io_error_conversion() {
+        let io_err = io::Error::new(io::ErrorKind::Other, "sample I/O error");
+        let file_manager_err: FileManagerError = io_err.into();
+        assert_eq!(format!("{}", file_manager_err), "I/O error: sample I/O error");
+    }
+
+    #[test]
+    fn test_config_error_display () {
+        let err = FileManagerError::ConfigError("invalid configuration".to_string());
+        assert_eq!(format!("{}", err), "Configuration error: invalid configuration");
+    }
+
+    #[test]
+    fn test_cli_error_display () {
+        let err = FileManagerError::CliError("CLI parsing failed".to_string());
+        assert_eq!(format!("{}", err), "Configuration error: CLI parsing failed");
+    }
+
+    #[test]
+    fn test_general_error_error_display () {
+        let err = FileManagerError::GeneralError("unexpected error occurred".to_string());
+        assert_eq!(format!("{}", err), "Configuration error: unexpected error occurred");
     }
 }

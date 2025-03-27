@@ -8,7 +8,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "dev": "vite",
-    "dev:desktop": "tauri dev"
+    "dev:desktop": "tauri dev",
+    "test": "vitest"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
@@ -36,6 +37,7 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "~5.6.2",
-    "vite": "^6.0.3"
+    "vite": "^6.0.3",
+    "vitest": "^3.0.9"
   }
 }

@@ -4,7 +4,6 @@
 //! directory traversal, and formatting functions that are used throughout
 //! the application
 
-use std::{fs, io};
 use std::path::Path;
 
 /// Checks whether a given path exists and is a directory
@@ -28,42 +27,6 @@ pub fn is_directory<P: AsRef<Path>>(path: P) -> bool {
     path.as_ref().is_dir()
 }
 
-/// Recursively lists files in a directory.
-///
-/// # Arguments
-///
-/// * `dir_path` - A reference to the directory path to traverse.
-///
-/// # Returns
-///
-/// Returns a `Result` containing a vector of file paths as `String`s if
-/// successful, or an `io::Error` otherwise.
-///
-/// # Example
-///
-/// ```rust
-/// use crate::common::utils::list_files_recursive;
-///
-/// let files = list_files_recursive("path/to/directory")
-///             .expect("Failed to list files);
-/// for file in files {
-///     println("{}", file);
-/// }
-/// ```
-pub fn list_files_recursive<P : AsRef<Path>>(dir_path: P) ->io::Result<Vec<String>> {
-    let mut file_list = Vec::new();
-    for entry in fs::read_dir(dir_path) ? {
-        let entry = entry?;
-        let path = entry.path();
-        if path.is_dir() {
-            file_list.extend(list_files_recursive(&path)?);
-        } else if let Some(path_str) = path.to_str() {
-            file_list.push(path_str.to_string());
-        }
-    }
-    Ok(file_list)
-}
-
 /// Formats a file size (in bytes) into a human-readable string.
 /// # Arguments
 ///
@@ -81,7 +44,11 @@ pub fn list_files_recursive<P : AsRef<Path>>(dir_path: P) ->io::Result<Vec<Strin
 /// let size_str = format_file_size(1_234_567);
 /// println!("File size: {}", size_str);
 /// ```
+
+#[tauri::command]
 pub fn format_file_size(size_bytes: u64) -> String {
+    println!("Size: {}", size_bytes);
+
     const KB: u64 = 1024;
     const MB: u64 = 1024 * KB;
     const GB: u64 = 1024 * MB;
@@ -92,7 +59,7 @@ pub fn format_file_size(size_bytes: u64) -> String {
         format!("{:.2} MB", size_bytes as f64 / MB as f64)
     } else if size_bytes >= KB {
         format!("{:.2} KB", size_bytes as f64 / KB as f64)
-    } else  {
+    } else {
         format!("{:.1} B", size_bytes)
     }
 }
