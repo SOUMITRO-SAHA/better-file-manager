@@ -6,7 +6,6 @@
 //!
 //! - `local`: Contains functions and a struct to handle local storage operations.
 
-pub mod local;
 pub mod disk;
-mod user;
-mod symlink;
+pub mod local;
+pub mod symlink;

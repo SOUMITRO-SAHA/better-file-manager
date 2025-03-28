@@ -44,8 +44,6 @@ pub fn is_directory<P: AsRef<Path>>(path: P) -> bool {
 /// let size_str = format_file_size(1_234_567);
 /// println!("File size: {}", size_str);
 /// ```
-
-#[tauri::command]
 pub fn format_file_size(size_bytes: u64) -> String {
     println!("Size: {}", size_bytes);
 
