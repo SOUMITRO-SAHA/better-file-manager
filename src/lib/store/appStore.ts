@@ -3,27 +3,27 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { storage } from "../storage";
 
 interface AppStoreState {
-  // Define your state properties here
+    defaultSelectedDir: string | null;
 }
 
-interface AppStoreActions {
-  // Define your action methods here
-}
+interface AppStoreActions {}
 
 const initialAppState: AppStoreState = {
-  // Initialize your state properties here
+    defaultSelectedDir: "recent",
 };
 
 export const useAppStore = create<AppStoreState & AppStoreActions>()(
-  persist(
-    () => ({
-      ...initialAppState,
-      // Implement your action methods here
-    }),
-    {
-      name: "appStore",
-      partialize: (state) => ({}),
-      storage: createJSONStorage(() => storage),
-    },
-  ),
+    persist(
+        () => ({
+            ...initialAppState,
+            // Implement your action methods here
+        }),
+        {
+            name: "appStore",
+            partialize: (state) => ({
+                defaultSelectedDir: state.defaultSelectedDir,
+            }),
+            storage: createJSONStorage(() => storage),
+        },
+    ),
 );
