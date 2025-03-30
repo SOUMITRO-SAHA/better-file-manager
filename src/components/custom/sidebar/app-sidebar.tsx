@@ -41,7 +41,6 @@ const AppSidebar: React.FC<AppSidebarProps> = (props) => {
                             />
                         );
                     })}
-                    <SidebarGroup />
                 </SidebarContent>
                 <SidebarFooter />
             </ScrollArea>
