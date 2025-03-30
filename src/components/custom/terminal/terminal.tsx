@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
 import * as React from "react";
+import TerminalHeader from "./terminal-header";
+import TerminalBody from "./terminal-body";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TerminalProps {
   close: () => void;
@@ -10,20 +11,30 @@ interface TerminalProps {
 const Terminal: React.FC<TerminalProps> = (props) => {
   const { close } = props;
 
+  const [command, setCommand] = React.useState<string[]>([]);
+
+  // --- Handlers
+  const handleCommand = (command: string) => {
+    if (command.trim()) {
+      setCommand((prev) => [...prev, command]);
+    }
+  };
+
   return (
-    <div className={cn("w-full h-full")}>
+    <div className={cn("w-full h-full flex flex-col")}>
       {/* Terminal Header */}
-      <div className="h-auto w-full bg-popover px-4border-b flex justify-between items-center">
-        <div className="px-2">~/download/test</div>
-        <Button variant={"ghost"} size={"icon"} onClick={close}>
-          <X />
-        </Button>
+      <div className="flex-none">
+        <TerminalHeader close={close} />
       </div>
 
       {/* Terminal Body */}
-      <div className="px-4 p-2">
-        <h1>Hello World!!!</h1>
-      </div>
+      <ScrollArea className="flex-1 overflow-auto">
+        <TerminalBody
+          commands={command}
+          onCommand={handleCommand}
+          currentFolder="demo"
+        />
+      </ScrollArea>
     </div>
   );
 };
