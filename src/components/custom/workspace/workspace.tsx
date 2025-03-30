@@ -32,7 +32,7 @@ const Workspace: React.FC<WorkspaceProps> = (props) => {
         <ResizableHandle />
         {splitview && !isMobileScreen && (
           <ResizablePanel minSize={minSizeOfWindow}>
-            <Window className="bg-red-900" window={2} />
+            <Window window={2} />
           </ResizablePanel>
         )}
       </ResizablePanelGroup>
