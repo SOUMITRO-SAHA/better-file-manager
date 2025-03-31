@@ -26,38 +26,3 @@ use std::path::Path;
 pub fn is_directory<P: AsRef<Path>>(path: P) -> bool {
     path.as_ref().is_dir()
 }
-
-/// Formats a file size (in bytes) into a human-readable string.
-/// # Arguments
-///
-/// * `size_bytes` - The size in bytes.
-///
-/// # Returns
-///
-/// Returns a `String` representing the human-readable file size (e.g. `1.25 MB`).
-///
-/// # Examples
-///
-/// ```rust
-/// use create::common::utils::format_file_size;
-///
-/// let size_str = format_file_size(1_234_567);
-/// println!("File size: {}", size_str);
-/// ```
-pub fn format_file_size(size_bytes: u64) -> String {
-    println!("Size: {}", size_bytes);
-
-    const KB: u64 = 1024;
-    const MB: u64 = 1024 * KB;
-    const GB: u64 = 1024 * MB;
-
-    if size_bytes >= GB {
-        format!("{:.2} GB", size_bytes as f64 / GB as f64)
-    } else if size_bytes >= MB {
-        format!("{:.2} MB", size_bytes as f64 / MB as f64)
-    } else if size_bytes >= KB {
-        format!("{:.2} KB", size_bytes as f64 / KB as f64)
-    } else {
-        format!("{:.1} B", size_bytes)
-    }
-}
