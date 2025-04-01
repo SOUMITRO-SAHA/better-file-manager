@@ -54,7 +54,12 @@ const SidebarTogglableGroupItem: React.FC<SidebarTogglableGroupItemProps> = (
                       />
                     );
                   case ESidebarGroup.LOCATIONS:
-                    return <SidebarLocationItem {...(item as IDisk)} />;
+                    return (
+                      <SidebarLocationItem
+                        key={item.name}
+                        {...(item as IDisk)}
+                      />
+                    );
                 }
 
                 return null;
