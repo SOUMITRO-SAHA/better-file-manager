@@ -7,6 +7,7 @@ import useScreenSize from "@/hooks/useScreenSize";
 import { cn } from "@/lib/utils";
 import * as React from "react";
 import Window from "./window";
+import { useAppStore } from "@/lib/store/appStore";
 
 interface WorkspaceProps {
   className?: string;
@@ -15,8 +16,10 @@ interface WorkspaceProps {
 
 const Workspace: React.FC<WorkspaceProps> = (props) => {
   const { className } = props;
-  const splitview = true; // Will come from user command
   const { screenSize, isMobileScreen } = useScreenSize();
+
+  // --- Store
+  const { splitView } = useAppStore();
 
   const minSizeOfWindow =
     screenSize === "2xl" ? 30 : screenSize === "lg" ? 30 : 40;
@@ -26,12 +29,12 @@ const Workspace: React.FC<WorkspaceProps> = (props) => {
       className={cn("h-svh w-svw overflow-hidden bg-neutral-950", className)}
     >
       <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel minSize={minSizeOfWindow}>
+        <ResizablePanel minSize={minSizeOfWindow} tabIndex={0}>
           <Window window={1} />
         </ResizablePanel>
         <ResizableHandle />
-        {splitview && !isMobileScreen && (
-          <ResizablePanel minSize={minSizeOfWindow}>
+        {splitView && !isMobileScreen && (
+          <ResizablePanel minSize={minSizeOfWindow} tabIndex={1}>
             <Window window={2} />
           </ResizablePanel>
         )}

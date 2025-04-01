@@ -2,25 +2,42 @@ import { cn } from "@/lib/utils";
 import * as React from "react";
 import MainHeader from "../header/main-header";
 import Terminal from "../terminal/terminal";
-import SearchBar from "../search/search";
+import { SearchBar } from "../search";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import BreadCrumbGenerator from "../breadcrumb/breadcrumb-generator";
+import useAppEventListner from "@/hooks/useAppEventListner";
+import { useAppStore } from "@/lib/store/appStore";
 
 interface WindowProps {
   className?: string;
-  window?: 1 | 2;
+  window: 1 | 2;
 }
 
 const Window: React.FC<WindowProps> = (props) => {
   const { className, window } = props;
   const [showTerminal, setShowTerminal] = React.useState<boolean>(true);
 
+  // --- Hooks
+  const { searchBarRef } = useAppEventListner();
+
+  // --- Store
+  const { setActiveWindowIndex } = useAppStore();
+
+  const handleOnFocus = React.useCallback(() => {
+    console.log("SearchBar focused! Updating active window index...", window);
+    setActiveWindowIndex(window);
+  }, [setActiveWindowIndex, window]);
+
   return (
-    <section className={cn("w-full h-full", className)}>
+    <section
+      className={cn("w-full h-full", className)}
+      onFocus={handleOnFocus}
+      onMouseDown={handleOnFocus}
+    >
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel>
           <div className={cn("flex flex-col justify-between")}>
@@ -28,7 +45,7 @@ const Window: React.FC<WindowProps> = (props) => {
               {/* App Header */}
               <MainHeader window={window} className="py-1">
                 {/* Search bar */}
-                <SearchBar className="w-auto flex-1 my-1" />
+                <SearchBar className="w-auto flex-1 my-1" ref={searchBarRef} />
               </MainHeader>
 
               {/* Breadcrumb */}
