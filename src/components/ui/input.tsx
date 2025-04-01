@@ -10,15 +10,18 @@ interface InputProps extends React.ComponentProps<"input"> {
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({
-    className,
-    type,
-    prefixIcon,
-    prefixLabel,
-    suffixIcon,
-    suffixLabel,
-    ...props
-  }: InputProps) => {
+  (
+    {
+      className,
+      type,
+      prefixIcon,
+      prefixLabel,
+      suffixIcon,
+      suffixLabel,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <div className="flex items-center w-full border border-input rounded-md px-3 py-1 shadow-xs bg-transparent focus-within:ring-2 focus-within:ring-ring/50 focus-within:border-ring">
         {prefixIcon && (
@@ -29,6 +32,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           type={type}
+          ref={ref}
           data-slot="input"
           className={cn(
             "flex-1 bg-transparent outline-none text-base md:text-sm placeholder:text-muted-foreground file:text-foreground file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
