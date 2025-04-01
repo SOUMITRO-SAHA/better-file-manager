@@ -7,18 +7,37 @@ interface SearchBarProps {
   className?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = (props) => {
-  const { className } = props;
+export interface SearchBarHandle {
+  focusInput: () => void;
+}
 
-  return (
-    <div className={cn("", className)}>
-      <Input
-        prefixIcon={<SearchIcon className="w-4 h-4" />}
-        type="text"
-        placeholder="Search..."
-      />
-    </div>
-  );
-};
+export const SearchBar = React.forwardRef<SearchBarHandle, SearchBarProps>(
+  (props, ref) => {
+    const { className } = props;
+
+    // --- Ref
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    // --- Functions
+    React.useImperativeHandle(ref, () => ({
+      focusInput: () => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      },
+    }));
+
+    return (
+      <div className={cn("", className)}>
+        <Input
+          ref={inputRef}
+          prefixIcon={<SearchIcon className="w-4 h-4" />}
+          type="text"
+          placeholder="Search..."
+        />
+      </div>
+    );
+  },
+);
 
 export default SearchBar;
