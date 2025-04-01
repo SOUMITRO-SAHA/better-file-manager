@@ -1,19 +1,31 @@
+import { EFavouriteGroup } from "@/constants/default";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { storage } from "../storage";
 import { immer } from "zustand/middleware/immer";
-import { EFavouriteGroup } from "@/constants/default";
+import { storage } from "../storage";
+
+// interface IWindow {}
 
 interface AppStoreState {
   defaultSelectedDir: EFavouriteGroup;
+  showSettings: boolean;
+  splitView: boolean;
+  // windows: [IWindow, IWindow];
+  activeWindowIndex: 1 | 2;
 }
 
 interface AppStoreActions {
   setDefaultSelectedDir: (item: EFavouriteGroup) => void;
+  setToggleShowSettings: () => void;
+  setToggleSplitView: () => void;
+  setActiveWindowIndex: (index: 1 | 2) => void;
 }
 
 const initialAppState: AppStoreState = {
   defaultSelectedDir: EFavouriteGroup.RECENTS,
+  showSettings: false,
+  splitView: false,
+  activeWindowIndex: 1,
 };
 
 export const useAppStore = create<AppStoreState & AppStoreActions>()(
@@ -24,11 +36,26 @@ export const useAppStore = create<AppStoreState & AppStoreActions>()(
         set((state) => {
           state.defaultSelectedDir = dir;
         }),
+      setToggleShowSettings: () =>
+        set((state) => {
+          state.showSettings = !state.showSettings;
+        }),
+      setToggleSplitView: () =>
+        set((state) => {
+          state.splitView = !state.splitView;
+        }),
+      setActiveWindowIndex: (index: 1 | 2) =>
+        set((state) => {
+          state.activeWindowIndex = index;
+        }),
     })),
     {
       name: "appStore",
       partialize: (state) => ({
         defaultSelectedDir: state.defaultSelectedDir,
+        showSettings: state.showSettings,
+        splitView: state.splitView,
+        activeWindowIndex: state.activeWindowIndex,
       }),
       storage: createJSONStorage(() => storage),
     },
