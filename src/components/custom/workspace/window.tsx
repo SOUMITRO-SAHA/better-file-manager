@@ -19,24 +19,30 @@ interface WindowProps {
 
 const Window: React.FC<WindowProps> = (props) => {
   const { className, window } = props;
-  const [showTerminal, setShowTerminal] = React.useState<boolean>(true);
 
   // --- Hooks
   const { searchBarRef } = useAppEventListner();
 
   // --- Store
-  const { setActiveWindowIndex } = useAppStore();
+  const { setActiveWindowIndex, showTerminals, setTerminalState } =
+    useAppStore();
 
+  const shouldShowTerminal = showTerminals?.[window - 1];
+
+  // --- Handlers
   const handleOnFocus = React.useCallback(() => {
-    console.log("SearchBar focused! Updating active window index...", window);
     setActiveWindowIndex(window);
   }, [setActiveWindowIndex, window]);
 
   return (
     <section
       className={cn("w-full h-full", className)}
+      tabIndex={0}
       onFocus={handleOnFocus}
-      onMouseDown={handleOnFocus}
+      onMouseDown={(e) => {
+        e.currentTarget.focus();
+        handleOnFocus();
+      }}
     >
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel>
@@ -63,11 +69,11 @@ const Window: React.FC<WindowProps> = (props) => {
 
         <ResizableHandle />
 
-        {showTerminal && (
+        {shouldShowTerminal && (
           <ResizablePanel minSize={10} maxSize={40} defaultSize={20}>
             <Terminal
               close={() => {
-                setShowTerminal((prev) => !prev);
+                setTerminalState((window - 1) as 0 | 1, !shouldShowTerminal);
               }}
             />
           </ResizablePanel>

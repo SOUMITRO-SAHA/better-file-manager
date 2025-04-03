@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAppStore } from "@/lib/store/appStore";
 import { cn } from "@/lib/utils";
 import {
   ChevronLeft,
@@ -18,12 +19,23 @@ import * as React from "react";
 
 interface MainHeaderProps {
   children?: React.ReactNode;
-  window?: 1 | 2;
+  window: 1 | 2;
   className?: string;
 }
 
 const MainHeader: React.FC<MainHeaderProps> = (props) => {
   const { children, window, className } = props;
+
+  // --- Store
+  const {
+    setToggleSplitView,
+    showTerminals,
+    setTerminalState,
+    activeWindowIndex,
+  } = useAppStore();
+
+  const shouldShowTerminal = showTerminals?.[window - 1];
+
   return (
     <div
       className={cn(
@@ -90,7 +102,15 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant={"ghost"} size={"icon"} className="ml-auto">
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              className="ml-auto"
+              onClick={() => {
+                const newActiveWindowIndex = (activeWindowIndex - 1) as 0 | 1;
+                setTerminalState(newActiveWindowIndex, !shouldShowTerminal);
+              }}
+            >
               <Terminal />
             </Button>
           </TooltipTrigger>
@@ -98,16 +118,24 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
             <p>Open Terminal</p>
           </TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant={"ghost"} size={"icon"}>
-              <X />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Close</p>
-          </TooltipContent>
-        </Tooltip>
+        {window === 2 && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={"ghost"}
+                size={"icon"}
+                onClick={() => {
+                  setToggleSplitView();
+                }}
+              >
+                <X />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Close</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
     </div>
   );

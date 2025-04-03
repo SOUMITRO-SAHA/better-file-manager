@@ -4,21 +4,25 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { storage } from "../storage";
 
-// interface IWindow {}
+export type FileViewOptionType = "list" | "detailed-list" | "grid";
 
 interface AppStoreState {
   defaultSelectedDir: EFavouriteGroup;
   showSettings: boolean;
   splitView: boolean;
-  // windows: [IWindow, IWindow];
+  showTerminals: [boolean, boolean]; // let the index be the window
   activeWindowIndex: 1 | 2;
+  fileViewOption: FileViewOptionType;
 }
 
 interface AppStoreActions {
   setDefaultSelectedDir: (item: EFavouriteGroup) => void;
   setToggleShowSettings: () => void;
-  setToggleSplitView: () => void;
+  setToggleSplitView: (display: boolean) => void;
   setActiveWindowIndex: (index: 1 | 2) => void;
+  setTerminalState: (index: 0 | 1, value: boolean) => void;
+  setFileViewOption: (option: FileViewOptionType) => void;
+  reset: () => void;
 }
 
 const initialAppState: AppStoreState = {
@@ -26,6 +30,8 @@ const initialAppState: AppStoreState = {
   showSettings: false,
   splitView: false,
   activeWindowIndex: 1,
+  showTerminals: [false, false],
+  fileViewOption: "list", // Default file view option
 };
 
 export const useAppStore = create<AppStoreState & AppStoreActions>()(
@@ -40,14 +46,25 @@ export const useAppStore = create<AppStoreState & AppStoreActions>()(
         set((state) => {
           state.showSettings = !state.showSettings;
         }),
-      setToggleSplitView: () =>
+      setToggleSplitView: (display: boolean) =>
         set((state) => {
-          state.splitView = !state.splitView;
+          state.splitView = display;
         }),
       setActiveWindowIndex: (index: 1 | 2) =>
         set((state) => {
           state.activeWindowIndex = index;
         }),
+      setTerminalState: (index: 0 | 1, value: boolean) =>
+        set((state) => {
+          state.showTerminals[index] = value;
+        }),
+      setFileViewOption: (option: FileViewOptionType) =>
+        set((state) => {
+          state.fileViewOption = option;
+        }),
+      reset: () => {
+        set(initialAppState);
+      },
     })),
     {
       name: "appStore",
@@ -56,6 +73,8 @@ export const useAppStore = create<AppStoreState & AppStoreActions>()(
         showSettings: state.showSettings,
         splitView: state.splitView,
         activeWindowIndex: state.activeWindowIndex,
+        showTerminals: state.showTerminals,
+        fileViewOption: state.fileViewOption,
       }),
       storage: createJSONStorage(() => storage),
     },

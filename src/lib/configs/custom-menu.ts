@@ -1,6 +1,9 @@
-import { Menu, PredefinedMenuItem, Submenu } from "@tauri-apps/api/menu";
-import { useAppStore } from "../store/appStore";
 import { emit } from "@tauri-apps/api/event";
+import { relaunch } from "@tauri-apps/plugin-process";
+import { Menu, PredefinedMenuItem, Submenu } from "@tauri-apps/api/menu";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useAppStore } from "../store/appStore";
+import { changeFileViewOption, toggleSplitView } from "../utils/common";
 
 export async function setUpMenu() {
   const separator = await PredefinedMenuItem.new({
@@ -31,16 +34,17 @@ export async function setUpMenu() {
         id: "hide_better",
         text: "Hide Better",
         accelerator: "CmdOrCtrl+H",
-        action: () => {
-          console.log("Clicked Hide better file manager!!!");
+        action: async () => {
+          await getCurrentWindow().minimize();
         },
       },
       {
         id: "hide_others",
         text: "Hide Others",
         accelerator: "Alt+CmdOrCtrl+H",
-        action: () => {
-          console.log("Clicked Hide others!!!");
+        action: async () => {
+          // This is working automatically, We have to check whether it is working on all the Platforms
+          // I am using macOS
         },
       },
       separator,
@@ -59,8 +63,8 @@ export async function setUpMenu() {
         id: "quit",
         text: "Quit",
         accelerator: "CmdOrCtrl+Q",
-        action: () => {
-          console.log("Quit");
+        action: async () => {
+          await getCurrentWindow().close();
         },
       },
     ],
@@ -92,18 +96,15 @@ export async function setUpMenu() {
         text: "Split Window",
         accelerator: "Shift+CmdOrCtrl+I",
         action: () => {
-          console.log("Clicked Split Window");
-
-          const appStore = useAppStore.getState();
-          appStore.setToggleSplitView();
+          toggleSplitView(true);
         },
       },
       {
         id: "close_split_window",
         text: "Close Split Window",
-        accelerator: "CmdOrCtrl+Alt+I",
+        accelerator: "CmdOrCtrl+Ctrl+Shift+I",
         action: () => {
-          console.log("Clicked Close Split Window");
+          toggleSplitView(false);
         },
       },
       separator,
@@ -135,22 +136,16 @@ export async function setUpMenu() {
         id: "redo",
         text: "Redo",
         accelerator: "CmdOrCtrl+Shift+Z",
+        enabled: false,
         action: () => {
           console.log("Redo clicked!!!");
         },
       },
       separator,
       {
-        id: "redo",
-        text: "Redo",
-        accelerator: "CmdOrCtrl+Shift+Z",
-        action: () => {
-          console.log("Redo clicked!!!");
-        },
-      },
-      {
         id: "cut",
         text: "Cut",
+        enabled: false,
         accelerator: "CmdOrCtrl+X",
         action: () => {
           console.log("Cut clicked!!!");
@@ -159,6 +154,7 @@ export async function setUpMenu() {
       {
         id: "copy",
         text: "Copy",
+        enabled: false,
         accelerator: "CmdOrCtrl+C",
         action: () => {
           console.log("Copy clicked!!!");
@@ -167,6 +163,7 @@ export async function setUpMenu() {
       {
         id: "paste",
         text: "Paste",
+        enabled: false,
         accelerator: "CmdOrCtrl+V",
         action: () => {
           console.log("Paste clicked!!!");
@@ -193,6 +190,7 @@ export async function setUpMenu() {
         accelerator: "CmdOrCtrl+1",
         action: () => {
           console.log("As List clicked!!!");
+          changeFileViewOption("list");
         },
       },
       {
@@ -201,6 +199,7 @@ export async function setUpMenu() {
         accelerator: "CmdOrCtrl+2",
         action: () => {
           console.log("As Detailed List clicked!!!");
+          changeFileViewOption("detailed-list");
         },
       },
       {
@@ -209,6 +208,7 @@ export async function setUpMenu() {
         accelerator: "CmdOrCtrl+3",
         action: () => {
           console.log("As Grid clicked!!!");
+          changeFileViewOption("grid");
         },
       },
       separator,
@@ -296,8 +296,22 @@ export async function setUpMenu() {
         id: "reload",
         text: "Reload",
         accelerator: "CmdOrCtrl+R",
-        action: () => {
+        action: async () => {
           console.log("Reload clicked!!!");
+
+          try {
+            // Emit a custom event
+            await emit("reload", {});
+
+            // Reset app store state
+            const appStore = useAppStore.getState();
+            appStore.reset();
+
+            // reload the app
+            await relaunch();
+          } catch (error) {
+            console.error("Error reloading window:", error);
+          }
         },
       },
     ],
