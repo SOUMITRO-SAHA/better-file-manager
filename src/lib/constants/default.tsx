@@ -2,8 +2,8 @@
  * Here we will follow lower case only, no capitalisation
  */
 
-import { cn } from "@/lib/utils";
 import { IDisk } from "@/types/system";
+import { Platform } from "@tauri-apps/plugin-os";
 import {
   Circle,
   CircleArrowDown,
@@ -20,13 +20,17 @@ import {
   Trash2,
 } from "lucide-react";
 
-type PlatformType = "mac" | "windows" | "linux";
-
 export interface ISidebarItem {
   name: string; // will act as a key
   icon: LucideIcon;
   mountPoint: string;
-  targetPlatform: PlatformType[];
+  targetPlatform: Platform[];
+  defaultDisplay?: boolean;
+}
+
+export interface ITag {
+  name: string;
+  color: string;
 }
 
 export interface ISidebarGroup {
@@ -42,6 +46,8 @@ export type SidebarType = {
 export enum ESidebarGroup {
   FAVOURITES = "favourites",
   LOCATIONS = "locations",
+  NETWORK = "network",
+  TAGS = "tags",
 }
 
 export enum EFavouriteGroup {
@@ -64,25 +70,26 @@ export const defaultSidebar: Readonly<SidebarType> = {
       name: "developer",
       icon: CodeXml,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["linux", "windows", "mac"],
+      targetPlatform: ["linux", "windows", "macos"],
     },
     {
       name: "recents",
       icon: History,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["mac", "linux", "windows"],
+      defaultDisplay: true,
+      targetPlatform: ["macos", "linux", "windows"],
     },
     {
       name: "home",
       icon: House,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["mac", "linux", "windows"],
+      targetPlatform: ["macos", "linux", "windows"],
     },
     {
       name: "applications",
       icon: PencilRuler,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["mac"],
+      targetPlatform: ["macos"],
     },
     {
       name: "desktop",
@@ -94,37 +101,44 @@ export const defaultSidebar: Readonly<SidebarType> = {
       name: "documents",
       icon: FileText,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["mac", "linux", "windows"],
+      targetPlatform: ["macos", "linux", "windows"],
     },
     {
       name: "downloads",
       icon: CircleArrowDown,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["mac", "linux", "windows"],
+      targetPlatform: ["macos", "linux", "windows"],
     },
     {
       name: "music",
       icon: Music,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["mac", "linux", "windows"],
+      targetPlatform: ["macos", "linux", "windows"],
     },
     {
-      name: "Pictures",
+      name: "pictures",
       icon: FileImage,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["mac", "linux", "windows"],
+      targetPlatform: ["macos", "linux", "windows"],
     },
     {
       name: "videos",
       icon: Film,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["mac", "linux", "windows"],
+      targetPlatform: ["macos", "linux", "windows"],
+    },
+    {
+      name: "movies",
+      icon: Film,
+      mountPoint: "", // Will Update based on the Platform
+      targetPlatform: ["macos", "linux", "windows"],
     },
     {
       name: "trash",
       icon: Trash2,
       mountPoint: "", // Will Update based on the Platform
-      targetPlatform: ["mac", "linux", "windows"],
+      defaultDisplay: true,
+      targetPlatform: ["macos", "linux", "windows"],
     },
   ],
   locations: [],
@@ -134,25 +148,19 @@ export const defaultSidebar: Readonly<SidebarType> = {
  * This will be like search implementation
  * TODO: Will take in the V2 (Sprint 2)
  */
-export const defaultTags = {
+export const defaultTags: { tags: ITag[] } = {
   tags: [
     {
       name: "red",
-      icon: (className?: string) => (
-        <Circle className={cn("fill-red-500 text-red-500", className)} />
-      ),
+      color: "#FF0000",
     },
     {
       name: "orange",
-      icon: (className?: string) => (
-        <Circle className={cn("fill-orange-500 text-orange-500", className)} />
-      ),
+      color: "#FFA500",
     },
     {
       name: "green",
-      icon: (className?: string) => (
-        <Circle className={cn("fill-gray-500 text-gray-500", className)} />
-      ),
+      color: "#00FF00",
     },
   ],
 };

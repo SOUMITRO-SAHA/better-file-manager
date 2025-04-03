@@ -70,6 +70,6 @@ pub fn copy_directory(from: PathBuf, to: PathBuf) -> Result<(), String> {
 /// List user a directory.
 #[cfg(desktop)]
 #[command]
-pub fn get_user_directory(from: PathBuf, to: PathBuf) -> Result<Vec<PathBuf>, String> {
+pub fn get_user_directory() -> Result<Vec<PathBuf>, String> {
     LocalFileSystem::list_user_folders().map_err(|e| e.to_string())
 }

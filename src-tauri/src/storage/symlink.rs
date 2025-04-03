@@ -86,7 +86,7 @@ mod tests {
         SymlinkInfo::create_symlink(&target, &symlink).unwrap();
         assert!(symlink.exists());
 
-        SymlinkInfo::remove_symlink(&target, &symlink).unwrap();
+        SymlinkInfo::remove_symlink(target).unwrap();
         assert!(!symlink.exists());
     }
 }

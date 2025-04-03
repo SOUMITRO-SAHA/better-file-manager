@@ -1,9 +1,10 @@
 import {
   defaultSidebar,
   ESidebarGroup,
+  ITag,
   type ISidebarItem,
   type SidebarType,
-} from "@/constants/default";
+} from "@/lib/constants/default";
 import { IDisk } from "@/types/system";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -12,18 +13,19 @@ import { storage } from "../storage";
 import { useAppStore } from "./appStore";
 
 interface SidebarStates {
-  activeItem: ISidebarItem | IDisk;
-  sidebarData: SidebarType;
+  activeItem: ISidebarItem | IDisk | ITag;
+  sidebarData: SidebarType | null;
 }
 
 interface SidebarActions {
-  setActiveItem: (item: ISidebarItem | IDisk) => void;
   resetSidebar: () => void;
+  setActiveItem: (item: ISidebarItem | IDisk | ITag) => void;
+  setSidebarData: (data: SidebarType) => void;
 }
 
 const initialSidebarState: SidebarStates = {
   activeItem: getInitialalActiveItem() as any,
-  sidebarData: defaultSidebar,
+  sidebarData: null,
 };
 
 export const useSidebarStore = create<SidebarStates & SidebarActions>()(
@@ -31,7 +33,11 @@ export const useSidebarStore = create<SidebarStates & SidebarActions>()(
     immer((set) => ({
       ...initialSidebarState,
       resetSidebar: () => set(() => ({ sidebarData: defaultSidebar })),
-      setActiveItem: (item: ISidebarItem | IDisk) =>
+      setSidebarData: (data: SidebarType) =>
+        set((state) => {
+          state.sidebarData = data;
+        }),
+      setActiveItem: (item: ISidebarItem | IDisk | ITag) =>
         set((state) => {
           state.activeItem = item;
         }),

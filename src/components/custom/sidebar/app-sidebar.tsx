@@ -4,33 +4,52 @@ import {
   SidebarContent,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { defaultSidebar, SidebarType } from "@/constants/default";
 import useSystem from "@/hooks/useSystem";
+import { useSidebarStore } from "@/lib/store/sidebarStore";
 import * as React from "react";
 import SidebarTogglableGroupItem from "./sidebar-togglable-group-item";
+import { defaultTags } from "@/lib/constants/default";
 
 interface AppSidebarProps {}
 
 const AppSidebar: React.FC<AppSidebarProps> = (props) => {
-  const [sidebar, setSidebar] = React.useState<SidebarType>(defaultSidebar);
-  // --- Hook
-  const { disks } = useSystem();
+  // --- Store
+  const { sidebarData, setSidebarData } = useSidebarStore();
 
-  // --- Effect
+  // --- Hook
+  const { disks, favourites } = useSystem();
+
+  // --- Effects
   React.useEffect(() => {
-    if (disks && Array.isArray(disks) && disks.length > 0) {
-      setSidebar((prev) => ({
-        ...prev,
-        locations: disks,
-      }));
+    if (disks && favourites) {
+      if (sidebarData === null) {
+        setSidebarData({
+          favourites: favourites,
+          locations: disks,
+        });
+      }
     }
-  }, [disks]);
+  }, [disks, favourites]);
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <ScrollArea className="w-full h-svh">
         <SidebarContent>
-          {Object.entries(sidebar).map(([title, items], _idx) => {
+          {sidebarData &&
+            Object.entries(sidebarData).map(([title, items], _idx) => {
+              return (
+                <SidebarTogglableGroupItem
+                  key={`${title}__${_idx}`}
+                  title={title}
+                  items={items}
+                />
+              );
+            })}
+
+          {/* Network */}
+
+          {/* Tags */}
+          {Object.entries(defaultTags).map(([title, items], _idx) => {
             return (
               <SidebarTogglableGroupItem
                 key={`${title}__${_idx}`}

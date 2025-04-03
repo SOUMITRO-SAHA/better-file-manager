@@ -1,4 +1,4 @@
-import { EFavouriteGroup } from "@/constants/default";
+import { EFavouriteGroup } from "@/lib/constants/default";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -9,6 +9,7 @@ export type FileViewOptionType = "list" | "detailed-list" | "grid";
 interface AppStoreState {
   defaultSelectedDir: EFavouriteGroup;
   showSettings: boolean;
+  showHiddenFiles: boolean;
   splitView: boolean;
   showTerminals: [boolean, boolean]; // let the index be the window
   activeWindowIndex: 1 | 2;
@@ -22,12 +23,14 @@ interface AppStoreActions {
   setActiveWindowIndex: (index: 1 | 2) => void;
   setTerminalState: (index: 0 | 1, value: boolean) => void;
   setFileViewOption: (option: FileViewOptionType) => void;
+  setShowHiddenFiles: (value: boolean) => void;
   reset: () => void;
 }
 
 const initialAppState: AppStoreState = {
   defaultSelectedDir: EFavouriteGroup.RECENTS,
   showSettings: false,
+  showHiddenFiles: false,
   splitView: false,
   activeWindowIndex: 1,
   showTerminals: [false, false],
@@ -61,6 +64,10 @@ export const useAppStore = create<AppStoreState & AppStoreActions>()(
       setFileViewOption: (option: FileViewOptionType) =>
         set((state) => {
           state.fileViewOption = option;
+        }),
+      setShowHiddenFiles: (value: boolean) =>
+        set((state) => {
+          state.showHiddenFiles = value;
         }),
       reset: () => {
         set(initialAppState);

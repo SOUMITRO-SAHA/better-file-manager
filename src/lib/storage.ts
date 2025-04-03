@@ -1,32 +1,42 @@
-import { load } from "@tauri-apps/plugin-store";
+import { LazyStore } from "@tauri-apps/plugin-store";
 import superjson from "superjson";
 import { StateStorage } from "zustand/middleware";
 
-const store = await load("bfm.json", { autoSave: true });
+const store = new LazyStore("bfm.json", {
+  autoSave: true,
+});
 
 export const storage: StateStorage = {
+  // Get the item from the store
   getItem: async (name: string): Promise<string | null> => {
-    const data = (await store.get(name)) as any;
-
-    if (data === undefined) return null;
     try {
-      const parsed = superjson.parse(data);
+      const storeValue = await store.get(name);
+      if (storeValue === undefined) return null;
+      const parsed = superjson.parse(storeValue as string);
       return superjson.stringify(parsed);
-    } catch (e) {
-      return data;
+    } catch (error) {
+      console.error(`Error getting item from store: ${error}`);
+      return null;
     }
   },
-  setItem: async (name: string, value: string): Promise<void> => {
+
+  // Set the item in the store
+  setItem: async (name: string, value: any): Promise<void> => {
     try {
       const parsed = superjson.parse(value);
       const serialized = superjson.stringify(parsed);
       await store.set(name, serialized);
-    } catch (e) {
-      await store.set(name, value);
+    } catch (error) {
+      console.error(`Error setting item in store: ${error}`);
     }
   },
+
   // Remove the item from the store
   removeItem: async (name: string): Promise<void> => {
-    await store.delete(name);
+    try {
+      await store.delete(name);
+    } catch (error) {
+      console.error(`Error removing item from store: ${error}`);
+    }
   },
 };

@@ -10,17 +10,18 @@ import {
   SidebarMenuButton,
   SidebarMenuSub,
 } from "@/components/ui/sidebar";
-import { ESidebarGroup, ISidebarItem } from "@/constants/default";
+import { ESidebarGroup, ISidebarItem, ITag } from "@/lib/constants/default";
 import { cn } from "@/lib/utils";
 import { IDisk } from "@/types/system";
 import { ChevronDown } from "lucide-react";
 import * as React from "react";
 import SidebarItem from "./sidebar-item";
 import SidebarLocationItem from "./sidebar-location-items";
+import SidebarTagItems from "./sidebar-tag-items";
 
 interface SidebarTogglableGroupItemProps {
   title: string;
-  items: ISidebarItem[] | IDisk[];
+  items: ISidebarItem[] | IDisk[] | ITag[];
   className?: string;
 }
 
@@ -51,13 +52,23 @@ const SidebarTogglableGroupItem: React.FC<SidebarTogglableGroupItemProps> = (
                       <SidebarItem
                         key={item.name}
                         item={item as ISidebarItem}
+                        iconColor={"var(--color-blue-500)"}
                       />
                     );
                   case ESidebarGroup.LOCATIONS:
                     return (
                       <SidebarLocationItem
                         key={item.name}
+                        iconColor={"var(--color-gray-500)"}
                         {...(item as IDisk)}
+                      />
+                    );
+                  case ESidebarGroup.TAGS:
+                    return (
+                      <SidebarTagItems
+                        key={item.name}
+                        iconColor={"var(--color-gray-500)"}
+                        {...(item as ITag)}
                       />
                     );
                 }
