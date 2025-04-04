@@ -43,4 +43,4 @@ const Workspace: React.FC<WorkspaceProps> = (props) => {
   );
 };
 
-export default Workspace;
+export default React.memo(Workspace);
