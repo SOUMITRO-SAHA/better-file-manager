@@ -1,28 +1,21 @@
 //! Commands for interaction with the local file system.
 
-use crate::storage::local::LocalFileSystem;
-use std::path::PathBuf;
+use crate::storage::local::{FileMetadata, LocalFileSystem};
+use std::path::{Path, PathBuf};
 use tauri::command;
 
-/// Reads a file and return its content.
-#[cfg(desktop)]
-#[command]
-pub fn read_file(path: PathBuf) -> Result<String, String> {
-    LocalFileSystem::read_file(path).map_err(|err| err.to_string())
-}
+// /// Lists files in a directory.
+// #[cfg(desktop)]
+// #[command]
+// pub fn list_files(directory: PathBuf) -> Result<Vec<PathBuf>, String> {
+//      LocalFileSystem::list_files(directory).map_err(|e| e.to_string())
+// }
 
-/// writes data to a file
+/// Reads the contents (both files and directories) of a directory.
 #[cfg(desktop)]
 #[command]
-pub fn write_file(path: PathBuf, data: String) -> Result<(), String> {
-    LocalFileSystem::write_file(path, &data).map_err(|err| err.to_string())
-}
-
-/// Lists files in a directory.
-#[cfg(desktop)]
-#[command]
-pub fn list_files(directory: PathBuf) -> Result<Vec<PathBuf>, String> {
-    LocalFileSystem::list_files(directory).map_err(|e| e.to_string())
+pub fn read_inside_dir(path: &Path) -> Result<Vec<FileMetadata>, String> {
+    LocalFileSystem::read_inside_dir(path).map_err(|e| e.to_string())
 }
 
 /// Deletes a file.
@@ -33,11 +26,11 @@ pub fn delete_file(path: PathBuf) -> Result<(), String> {
 }
 
 /// Lists directories inside a folder.
-#[cfg(desktop)]
-#[command]
-pub fn list_directories(directory: PathBuf) -> Result<Vec<PathBuf>, String> {
-    LocalFileSystem::list_dirs(directory).map_err(|e| e.to_string())
-}
+// #[cfg(desktop)]
+// #[command]
+// pub fn list_directories(directory: PathBuf) -> Result<Vec<PathBuf>, String> {
+//     LocalFileSystem::list_dirs(directory).map_err(|e| e.to_string())
+// }
 
 /// Create directory on a specific folder.
 #[cfg(desktop)]
