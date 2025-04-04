@@ -1,20 +1,51 @@
+import { IFileMetadata } from "@/types/file";
+import { invoke } from "@tauri-apps/api/core";
+import { homeDir } from "@tauri-apps/api/path";
 import * as React from "react";
 
 interface UseSystemProps {
-    // Define props here
+  mountPoint: string;
 }
 
 interface UseSystemReturn {
-    // Define return type here
+  homeDir: string;
+  dirContentDetails: IFileMetadata[];
 }
 
 const useFileManager = (props: UseSystemProps): UseSystemReturn => {
-    const [state, setState] = React.useState<Type | null>(null);
+  const { mountPoint = "/" } = props;
 
-    // --- Effects
-    React.useEffect(() => {}, []);
+  const [dirContentDetails, setDirContentDetails] = React.useState<
+    IFileMetadata[]
+  >([]);
+  const [homeDirectoryPath, setHomeDirectoryPath] = React.useState<string>("");
 
-    return state;
+  // --- Effects
+  React.useEffect(() => {
+    const fetchDir = async () => {
+      const homeDirPath = await homeDir();
+      setHomeDirectoryPath(homeDirPath);
+    };
+
+    fetchDir();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchSelectedPath = async () => {
+      const dirContentDetails: IFileMetadata[] = await invoke(
+        "read_inside_dir",
+        { path: mountPoint },
+      );
+      setDirContentDetails(dirContentDetails);
+    };
+
+    fetchSelectedPath();
+  }, [mountPoint]);
+
+  return {
+    homeDir: homeDirectoryPath,
+    dirContentDetails,
+  };
 };
 
 export default useFileManager;
