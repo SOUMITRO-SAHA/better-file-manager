@@ -5,8 +5,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useNavigation from "@/hooks/useNavigation";
 import { useAppStore } from "@/lib/store/appStore";
 import { cn } from "@/lib/utils";
+import { pathChange } from "@/lib/utils/common";
 import {
   ChevronLeft,
   ChevronRight,
@@ -36,6 +38,9 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
 
   const shouldShowTerminal = showTerminals?.[window - 1];
 
+  // --- Hooks
+  const { isForwardAvailable, isBackwardAvailable } = useNavigation();
+
   return (
     <div
       className={cn(
@@ -56,7 +61,17 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
         )}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant={"ghost"} size={"icon"} className="ml-auto">
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              className="ml-auto"
+              disabled={!isBackwardAvailable}
+              onClick={() => {
+                pathChange({
+                  direction: "backward",
+                });
+              }}
+            >
               <ChevronLeft />
             </Button>
           </TooltipTrigger>
@@ -67,7 +82,17 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant={"ghost"} size={"icon"} className="ml-auto">
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              className="ml-auto"
+              disabled={!isForwardAvailable}
+              onClick={() => {
+                pathChange({
+                  direction: "forward",
+                });
+              }}
+            >
               <ChevronRight />
             </Button>
           </TooltipTrigger>
