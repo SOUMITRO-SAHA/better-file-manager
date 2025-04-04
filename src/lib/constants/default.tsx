@@ -5,7 +5,6 @@
 import { IDisk } from "@/types/system";
 import { Platform } from "@tauri-apps/plugin-os";
 import {
-  Circle,
   CircleArrowDown,
   CodeXml,
   FileImage,
