@@ -1,47 +1,127 @@
 //! Module for interacting with local file system.
 
 use crate::common::error::FileManagerError;
-use serde::Serialize;
+use crate::storage::utils::determine_file_type;
+use serde::{Deserialize, Serialize};
 use std::fs;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 
 /// Providers methods to interact with the local file system.
 #[derive(Debug, Serialize)]
 pub struct LocalFileSystem;
 
-impl LocalFileSystem {
-    /// Reads a file and returns its contents as a string.
-    ///
-    /// # Arguments
-    ///
-    /// * `path` - The path to the file.
-    ///
-    /// # Errors
-    ///
-    /// Returns a `FileManagerError` if the file cannot be read.
-    pub fn read_file<P: AsRef<Path>>(path: P) -> Result<String, FileManagerError> {
-        fs::read_to_string(path).map_err(FileManagerError::from)
-    }
+#[derive(Debug, Serialize, Deserialize)]
+pub enum EFileType {
+    Folder,
+    ZipArchive,
+    PlainText,
+    Markdown,
+    Image,
+    Audio,
+    Video,
+    Document,
+    Spreadsheet,
+    Presentation,
+    Executable,
+    Library,
+    DiskImage,
+    Archive,
+    Apk, // Android packages
+    Ipa, // iOS application
+    Unknown,
+}
 
-    /// Writes data to a specified file, creating it (and parent directories) if necessary
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FileMetadata {
+    pub name: String,
+    pub size: u64,
+    pub mount_point: String,
+    pub tags: Vec<String>,
+    pub file_type: EFileType,
+    pub is_directory: bool,
+    pub is_file: bool,
+    pub created_at: String,
+    pub modified_at: String,
+    pub added_at: String,
+    pub open_with: String,
+}
+
+impl FileMetadata {
+    pub fn new(path: PathBuf) -> Result<Self, FileManagerError> {
+        let metadata = fs::metadata(&path)?;
+        let file_name = path
+            .file_name()
+            .map(|name| name.to_string_lossy().into_owned())
+            .unwrap_or_else(|| String::from("unknown"));
+        let is_directory = metadata.is_dir();
+        let is_file = !is_directory;
+        let file_type = determine_file_type(&path, is_directory);
+
+        // Convert system times to human-readable strings using humantime.
+        let created_at = metadata
+            .created()
+            .map(|t| humantime::format_rfc3339(t).to_string())
+            .unwrap_or_else(|_| "unknown".to_string());
+        let modified_at = metadata
+            .modified()
+            .map(|t| humantime::format_rfc3339(t).to_string())
+            .unwrap_or_else(|_| "unknown".to_string());
+        let added_at = metadata
+            .created()
+            .map(|t| humantime::format_rfc3339(t).to_string())
+            .unwrap_or_else(|_| "unknown".to_string());
+
+        let open_with = String::from("unknown");
+
+        Ok(Self {
+            name: file_name,
+            size: metadata.len(),
+            mount_point: String::from("unknown"),
+            tags: Vec::new(),
+            file_type,
+            is_directory,
+            is_file,
+            created_at,
+            modified_at,
+            added_at,
+            open_with,
+        })
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct File {
+    pub metadata: FileMetadata,
+    pub content: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Directory {
+    pub metadata: FileMetadata,
+    pub children: Vec<FileMetadata>,
+}
+
+impl LocalFileSystem {
+    /// Reads the contents (both files and directories) of a directory and returns their metadata.
     ///
     /// # Arguments
     ///
-    /// * `path` - The path to the file.
-    /// * `data` - The data to write.
+    /// * `path` - The directory to read.
     ///
-    /// # Errors
+    /// # Error
     ///
-    /// Returns a `FileManagerError` if the file cannot be written.
-    pub fn write_file<P: AsRef<Path>>(path: P, data: &str) -> Result<(), FileManagerError> {
-        if let Some(parent) = path.as_ref().parent() {
-            fs::create_dir_all(parent)?;
+    /// Returns a `FileManagerError` if the directory cannot be read.
+    pub fn read_inside_dir(path: &Path) -> Result<Vec<FileMetadata>, FileManagerError> {
+        let mut files = Vec::new();
+        for entry in fs::read_dir(path)? {
+            let entry = entry?;
+            let path = entry.path();
+            match FileMetadata::new(path) {
+                Ok(metadata) => files.push(metadata),
+                Err(e) => return Err(e),
+            }
         }
-        let mut file = fs::File::create(path)?;
-        file.write_all(data.as_bytes())?;
-        file.sync_all()?;
-        Ok(())
+        Ok(files)
     }
 
     /// Lists all files in a directory
@@ -52,8 +132,8 @@ impl LocalFileSystem {
     ///
     /// # Error
     ///
-    /// Returns a `FileManagerError` if the direcotry cannot be read.
-    pub fn list_files<P: AsRef<Path>>(path: P) -> Result<Vec<PathBuf>, FileManagerError> {
+    /// Returns a `FileManagerError` if the directory cannot be read.
+    fn list_files<P: AsRef<Path>>(path: P) -> Result<Vec<PathBuf>, FileManagerError> {
         let mut files = Vec::new();
         for entry in fs::read_dir(path)? {
             let entry = entry?;
@@ -100,7 +180,7 @@ impl LocalFileSystem {
     /// # Errors
     ///
     /// Returns a `FileManagerError` if the directory cannot be read.
-    pub fn list_dirs<P: AsRef<Path>>(path: P) -> Result<Vec<PathBuf>, FileManagerError> {
+    fn list_dirs<P: AsRef<Path>>(path: P) -> Result<Vec<PathBuf>, FileManagerError> {
         let mut directories = Vec::new();
         let path_ref = path.as_ref();
 
@@ -235,5 +315,25 @@ impl LocalFileSystem {
             }
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env::temp_dir;
+    use std::fs::{create_dir_all, write};
+
+    #[test]
+    fn test_read_inside_dir() {
+        // Create a temporary directory
+        let temp_dir = temp_dir();
+        let base_path = temp_dir.as_path();
+
+        // read all files and folder inside temp
+        let content_inside = LocalFileSystem::read_inside_dir(base_path);
+        println!("{:?}", content_inside);
+
+        assert!(content_inside.is_ok());
     }
 }
